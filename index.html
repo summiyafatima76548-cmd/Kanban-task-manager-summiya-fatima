@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kanban Task Board</title>
+
+  <!-- CSS FILE LINK -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- FONT AWESOME FOR ICONS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+<header class="topbar">
+  <div>
+    <h1>Kanban Board</h1>
+    <p class="subtitle">Task Management Dashboard</p>
+  </div>
+
+  <div class="topbar-actions">
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search tasks..."
+      class="search-input"
+    >
+    <select id="priorityFilter" class="filter-select">
+  <option value="">All Priority</option>
+  <option value="high">High</option>
+  <option value="medium">Medium</option>
+  <option value="low">Low</option>
+</select>
+<select id="sortTasks" class="filter-select">
+  <option value="">Sort By</option>
+  <option value="newest">Newest First</option>
+  <option value="oldest">Oldest First</option>
+  <option value="duedate">Due Date</option>
+</select>
+<button id="clearFiltersBtn" class="secondary-btn">
+  Clear Filters
+</button>
+    <button id="openTaskModalBtn" class="primary-btn">
+      <i class="fa-solid fa-plus"></i> Add Task
+    </button>
+    <button id="themeToggleBtn" class="primary-btn">
+    🌙 Dark Mode
+  </button>
+  </div>
+</header>
+<div class="stats-bar">
+
+  <div class="stat-card">
+    <h3 id="totalTasks">0</h3>
+    <p>Total Tasks</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="todoCount">0</h3>
+    <p>To Do</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="progressCount">0</h3>
+    <p>In Progress</p>
+  </div>
+
+  <div class="stat-card">
+    <h3 id="doneCount">0</h3>
+    <p>Done</p>
+  </div>
+<div class="stat-card">
+  <h3 id="overdueCount">0</h3>
+  <p>Overdue</p>
+</div>
+<div class="stat-card">
+  <h3 id="completionPercent">0%</h3>
+  <p>Completed</p>
+</div>
+</div>
+<div class="progress-section">
+
+  <div class="progress-header">
+    <span>Progress</span>
+    <span id="progressPercent">0%</span>
+  </div>
+
+  <div class="progress-bar">
+    <div id="progressFill" class="progress-fill"></div>
+  </div>
+
+</div>
+  <!-- BOARD -->
+  <main class="board">
+
+    <!-- TODO COLUMN -->
+    <section class="column">
+      <div class="column-header">
+        <h2>To Do</h2>
+        <button class="add-column-task-btn icon-btn" data-column="todo">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <div id="todoTasks" class="tasks-container">
+        <div class="empty-state">
+          <p>No tasks yet</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- IN PROGRESS COLUMN -->
+    <section class="column">
+      <div class="column-header">
+        <h2>In Progress</h2>
+        <button class="add-column-task-btn icon-btn" data-column="inprogress">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <div id="inprogressTasksList" class="tasks-container">
+        <div class="empty-state">
+          <p>No tasks yet</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DONE COLUMN -->
+    <section class="column">
+      <div class="column-header">
+        <h2>Done</h2>
+        <button class="add-column-task-btn icon-btn" data-column="done">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      <div id="doneTasks" class="tasks-container">
+        <div class="empty-state">
+          <p>No tasks yet</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- TASK MODAL -->
+  <div class="modal-overlay hidden" id="taskModalOverlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Add New Task</h2>
+        <button class="icon-btn" id="closeTaskModalBtn" type="button">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="taskForm" class="task-form">
+        <input type="hidden" id="taskId">
+
+        <!-- TITLE -->
+        <div class="form-group">
+          <label for="taskTitle">Task Title *</label>
+          <input type="text" id="taskTitle" placeholder="Enter task title">
+          <small class="error" id="titleError"></small>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="form-group">
+          <label for="taskDescription">Description</label>
+          <textarea id="taskDescription" rows="4" placeholder="Write task details..."></textarea>
+          <small class="error" id="descriptionError"></small>
+        </div>
+
+        <!-- PRIORITY + DUE DATE -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskPriority">Priority *</label>
+            <select id="taskPriority">
+              <option value="">Select priority</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+            <small class="error" id="priorityError"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="taskDueDate">Due Date *</label>
+            <input type="date" id="taskDueDate">
+            <small class="error" id="dueDateError"></small>
+          </div>
+        </div>
+
+        <!-- TAGS -->
+        <div class="form-group">
+          <label for="taskTagsInput">Tags</label>
+          <div class="tag-input-wrapper">
+            <input type="text" id="taskTagsInput" placeholder="Type tag and press Add">
+            <button type="button" id="addTagBtn" class="small-btn">Add</button>
+          </div>
+          <div id="tagsContainer" class="tags-container"></div>
+          <small class="error" id="tagsError"></small>
+        </div>
+
+        <!-- ASSIGNED COLUMN -->
+        <div class="form-group">
+          <label for="taskColumn">Assigned Column *</label>
+          <select id="taskColumn">
+            <option value="todo">To Do</option>
+            <option value="inprogress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+          <small class="error" id="columnError"></small>
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="modal-actions">
+          <button type="button" id="cancelTaskBtn" class="secondary-btn">Cancel</button>
+          <button type="submit" id="saveTaskBtn" class="primary-btn">Save Task</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS FILES -->
+  <script src="js/storage.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/board.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
